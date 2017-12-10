@@ -13,6 +13,7 @@ unsigned int _currentState;
 #define STOP_STATE 2
 #define WARMUP_STATE 3
 #define HOLD_STATE 4
+#define START_STATE 3
 
 void setup() {
   pinMode(SMOKE_PIN, OUTPUT);
@@ -20,7 +21,7 @@ void setup() {
   _watch = 0;
   _duration = 0;
   _nextTimer = WARMUP;
-  _currentState = WARMUP_STATE;
+  _currentState = START_STATE;
   startTimer(_nextTimer);
   Serial.begin(115200);
   delayMicroseconds(10);
