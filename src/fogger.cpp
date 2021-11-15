@@ -1,68 +1,52 @@
-unsigned long _watch, _seconds;
-unsigned int _duration;
-int _nextTimer;
-unsigned int _currentState;
+#include "fogger.h"
 
-
-#define DURATION 10 // time in seconds where smoke is on
-#define PAUSE 600 // Pause between smoke in seconds
-#define WARMUP 300 // time in seconds before first smoke
-#define SMOKE_PIN 9
-#define PAUSE_STATE 0
-#define SMOKE_STATE 1
-#define STOP_STATE 2
-#define WARMUP_STATE 3
-#define HOLD_STATE 4
-#define START_STATE 3
-
-void setup() {
+void fogger_setup() {
   pinMode(SMOKE_PIN, OUTPUT);
   digitalWrite(SMOKE_PIN, LOW);
+  pinMode(LED_PIN, OUTPUT);
+  _first = true;
   _watch = 0;
   _duration = 0;
   _nextTimer = WARMUP;
   _currentState = START_STATE;
   startTimer(_nextTimer);
-  Serial.begin(115200);
-  delayMicroseconds(10);
-  Serial.print("Arduino Ready, ");
-  Serial.print(_nextTimer);
-  Serial.println("s till first smoke");
+
 }
 
-void loop() {
+void fogger_loop() {
+  if (_first) {
+    Serial.print("Arduino Ready, ");
+    Serial.print(_nextTimer);
+    Serial.println("s till first smoke");
+    _first = false;
+  }
   if (checkTimer()) {
     if (_nextTimer > -1){
       changeState();
     }
   }
+
+  duration_card_value = (int) _duration;
+  timer_card_value = (int) getRemainingSeconds();
+
   if (Serial.available() > 0) {
                 // read the incoming byte:
                 String incoming = Serial.readString();
 
                 if (incoming.startsWith("sto")) {
-                  _currentState = STOP_STATE;
-                  changeState();
+                  setState(STOP_STATE);
                 }
                 else if (incoming.startsWith("star")) {
-                  _currentState = SMOKE_STATE;
-                  _watch = millis();
-                  changeState();
+                  setState(SMOKE_STATE);
                 }
                 else if (incoming.startsWith("smo")) {
-                  _currentState = PAUSE_STATE;
-                  _watch = millis();
-                  changeState();
+                  setState(PAUSE_STATE);
                 }
                 else if (incoming.startsWith("hol")) {
-                  _currentState = HOLD_STATE;
-                  _watch = millis();
-                  changeState();
+                  setState(HOLD_STATE);
                 }
                 else if (incoming.startsWith("pau")) {
-                  _currentState = SMOKE_STATE;
-                  _watch = millis();
-                  changeState();
+                  setState(SMOKE_STATE);
                 }
                 else if (incoming.startsWith("par")) {
                   printParameters();
@@ -78,7 +62,7 @@ void loop() {
                   }
                   printHelp();
                 }
-  } 
+  }
 }
 
 void printHelp() {
@@ -105,58 +89,80 @@ void printParameters() {
 
 
 void printState() {
-   Serial.print("State is ");
-    switch (_currentState) {
-      case PAUSE_STATE: 
-        Serial.println("Pause: " + String(getRemainingSeconds()) + "s");
-        break;
-      case SMOKE_STATE: 
-        Serial.println("Smoke: " + String(getRemainingSeconds()) + "s");
-        break;
-      case STOP_STATE: 
-        Serial.println("Stop");
-        break;
-      case WARMUP_STATE: 
-        Serial.println("WarmUp: " + String(getRemainingSeconds()) + "s");
-        break;
-      case HOLD_STATE: 
-        Serial.println("Hold");
-        break;
-      default:
-        Serial.println(_currentState);
-    }
+  Serial.print("State is ");
+  switch (_currentState) {
+    case PAUSE_STATE:
+      printStateHelper("Pause: " + String(getRemainingSeconds()) + "s");
+      break;
+    case SMOKE_STATE:
+      printStateHelper("Smoke: " + String(getRemainingSeconds()) + "s");
+      break;
+    case STOP_STATE:
+      printStateHelper("Stop");
+      break;
+    case WARMUP_STATE:
+      printStateHelper("WarmUp: " + String(getRemainingSeconds()) + "s");
+      break;
+    case HOLD_STATE:
+      printStateHelper("Hold");
+      break;
+    default:
+      Serial.println(_currentState);
+  }
+}
+
+void printStateHelper(String message) {
+  current_state_card_value = message;
+  Serial.println(current_state_card_value);
 }
 
 void changeState() {
-switch(_currentState) {
-  case PAUSE_STATE:
-    digitalWrite(SMOKE_PIN, HIGH);
-    _nextTimer = DURATION;
-    _currentState = SMOKE_STATE;
-    break;
-  case SMOKE_STATE:
-    digitalWrite(SMOKE_PIN, LOW);
-    _nextTimer = PAUSE;
-    _currentState = PAUSE_STATE;
-    break;
-  case HOLD_STATE:
-    digitalWrite(SMOKE_PIN, HIGH);
-    _nextTimer = -1;
-    break;
-  case STOP_STATE:
-    digitalWrite(SMOKE_PIN, LOW);
-    _nextTimer = -1;
-    break;
+  auto_smoke_card_value = false;
+  stop_smoke_card_value = false;
+  force_smoke_card_value = false;
+  switch(_currentState) {
+    case PAUSE_STATE:
+      digitalWrite(SMOKE_PIN, HIGH);
+      _nextTimer = DURATION;
+      _currentState = SMOKE_STATE;
+      auto_smoke_card_value = true;
+      break;
+    case SMOKE_STATE:
+      digitalWrite(SMOKE_PIN, LOW);
+      _nextTimer = PAUSE;
+      _currentState = PAUSE_STATE;
+      auto_smoke_card_value = true;
+      break;
+    case HOLD_STATE:
+      digitalWrite(SMOKE_PIN, HIGH);
+      _nextTimer = -1;
+      force_smoke_card_value = true;
+      break;
+    case STOP_STATE:
+      digitalWrite(SMOKE_PIN, LOW);
+      _nextTimer = -1;
+      stop_smoke_card_value = true;
+      break;
+    case WARMUP_STATE:
+      _nextTimer = DURATION;
+      digitalWrite(SMOKE_PIN, HIGH);
+      _currentState = SMOKE_STATE;
+      auto_smoke_card_value = true;
+      break;
   }
+  e131_card_value = "Off";
   startTimer(_nextTimer);
   printState();
 }
 
 unsigned int getRemainingSeconds() {
+  if (_nextTimer < 0) {
+    return 0;
+  }
   return _duration - ((millis() - _watch) / 1000);
 }
 
-void startTimer(unsigned int durationInSeconds ) {
+void startTimer(unsigned int durationInSeconds) {
   _watch = millis();
   _duration = durationInSeconds;
 }
@@ -174,3 +180,7 @@ void stop() {
    _currentState = STOP_STATE;
 }
 
+void setState(uint8_t state) {
+  _currentState = state;
+  changeState();
+}

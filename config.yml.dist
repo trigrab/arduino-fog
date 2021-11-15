@@ -1,0 +1,7 @@
+wifi:
+  ssid: "MY_WIFI"
+  pass: "CHANGEME"
+
+OTA:
+  enable: false
+  pass: "CHANGEME"
