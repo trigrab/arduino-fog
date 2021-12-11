@@ -3,18 +3,14 @@
 
 #include <Arduino.h>
 
-/* ESP8266 Dependencies */
-#include <ESP8266WiFi.h>
-#include <ESPAsyncTCP.h>
-#include <ESPAsyncWebServer.h>
-#include <ESPDash.h>
-
 // fogger values
 extern unsigned long _watch, _seconds;
 extern unsigned int _duration;
 extern int _nextTimer;
-extern unsigned int _currentState;
+extern uint8_t _currentState;
 extern bool _first;
+extern uint8_t _smokeDuration;
+extern uint8_t _pauseDuration;
 
 // dashboard values
 extern int timer_card_value;
@@ -25,8 +21,8 @@ extern bool force_smoke_card_value;
 extern String current_state_card_value;
 extern String e131_card_value;
 
-#define DURATION 30 // time in seconds where smoke is on
-#define PAUSE 120 // Pause between smoke in seconds
+#define SMOKE_DURATION 30 // time in seconds where smoke is on
+#define PAUSE_DURATION 120 // Pause between smoke in seconds
 #define WARMUP 10 // time in seconds before first smoke
 #define SMOKE_PIN 1
 #define PAUSE_STATE 0
@@ -51,5 +47,10 @@ void startTimer(unsigned int durationInSeconds);
 bool checkTimer();
 void stop();
 void setState(uint8_t state);
+uint8_t getState();
+void setSmokeDuration(uint8_t duration);
+uint8_t getSmokeDuration();
+void setPauseDuration(uint8_t duration);
+uint8_t getPauseDuration();
 
 #endif //ARDUINO_FOG_FOGGER_H

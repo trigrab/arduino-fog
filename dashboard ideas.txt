@@ -1,0 +1,27 @@
+
+# status
+
+Status: (smoke, force smoke, stop, pause, ...)
+Nextsmoke: 0s
+Pause: 120s
+Smoke duration: 30s
+Warmup duration: 30s
+
+# controls
+
+force smoke
+stop
+auto
+
+# settings
+
+set smoke duration: input number
+set pause duration: input number
+
+# advanced info
+
+version
+pinout
+default settings
+current settings
+

@@ -5,16 +5,20 @@
 
 #include "wifi.h"
 #include "ota.h"
-#include "dashboard.h"
+//#include "dashboard.h"
 #include "fogger.h"
 #include "e131.h"
+#include "webUI.h"
 
 // fogger values
 unsigned long _watch, _seconds;
 unsigned int _duration;
 int _nextTimer;
-unsigned int _currentState;
+uint8_t _currentState;
 bool _first;
+uint8_t _smokeDuration;
+uint8_t _pauseDuration;
+WebUI webUI;
 
 // dashboard values
 int timer_card_value;

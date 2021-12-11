@@ -9,8 +9,9 @@ void fogger_setup() {
   _duration = 0;
   _nextTimer = WARMUP;
   _currentState = START_STATE;
+  _smokeDuration = SMOKE_DURATION;
+  _pauseDuration = PAUSE_DURATION;
   startTimer(_nextTimer);
-
 }
 
 void fogger_loop() {
@@ -83,8 +84,8 @@ void printParameters() {
    Serial.println("static parameters are: ");
    Serial.println("Pin for smoke maker - " + String(SMOKE_PIN) + "s");
    Serial.println("Warmup duration - " + String(WARMUP) + "s");
-   Serial.println("Pause duration - " + String(PAUSE) + "s");
-   Serial.println("Smoke duration - " + String(DURATION) + "s");
+   Serial.println("Pause duration - " + String(_pauseDuration) + "s");
+   Serial.println("Smoke duration - " + String(_smokeDuration) + "s");
 }
 
 
@@ -123,13 +124,13 @@ void changeState() {
   switch(_currentState) {
     case PAUSE_STATE:
       digitalWrite(SMOKE_PIN, HIGH);
-      _nextTimer = DURATION;
+      _nextTimer = _smokeDuration;
       _currentState = SMOKE_STATE;
       auto_smoke_card_value = true;
       break;
     case SMOKE_STATE:
       digitalWrite(SMOKE_PIN, LOW);
-      _nextTimer = PAUSE;
+      _nextTimer = _pauseDuration;
       _currentState = PAUSE_STATE;
       auto_smoke_card_value = true;
       break;
@@ -144,7 +145,7 @@ void changeState() {
       stop_smoke_card_value = true;
       break;
     case WARMUP_STATE:
-      _nextTimer = DURATION;
+      _nextTimer = _smokeDuration;
       digitalWrite(SMOKE_PIN, HIGH);
       _currentState = SMOKE_STATE;
       auto_smoke_card_value = true;
@@ -183,4 +184,24 @@ void stop() {
 void setState(uint8_t state) {
   _currentState = state;
   changeState();
+}
+
+uint8_t getState() {
+  return _currentState;
+}
+
+void setSmokeDuration(uint8_t duration) {
+  _smokeDuration = duration;
+}
+
+uint8_t getSmokeDuration() {
+  return _smokeDuration;
+}
+
+void setPauseDuration(uint8_t duration) {
+  _pauseDuration = duration;
+}
+
+uint8_t getPauseDuration() {
+  return _pauseDuration;
 }
