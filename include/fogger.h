@@ -3,24 +3,6 @@
 
 #include <Arduino.h>
 
-// fogger values
-extern unsigned long _watch, _seconds;
-extern unsigned int _duration;
-extern int _nextTimer;
-extern uint8_t _currentState;
-extern bool _first;
-extern uint8_t _smokeDuration;
-extern uint8_t _pauseDuration;
-
-// dashboard values
-extern int timer_card_value;
-extern int duration_card_value;
-extern bool stop_smoke_card_value;
-extern bool auto_smoke_card_value;
-extern bool force_smoke_card_value;
-extern String current_state_card_value;
-extern String e131_card_value;
-
 #define SMOKE_DURATION 30 // time in seconds where smoke is on
 #define PAUSE_DURATION 120 // Pause between smoke in seconds
 #define WARMUP 10 // time in seconds before first smoke
@@ -33,24 +15,41 @@ extern String e131_card_value;
 #define START_STATE 3
 #define LED_PIN 4
 
-void fogger_setup();
-void fogger_loop();
+class Fogger {
+  private:
+    unsigned long _watch, _seconds;
+    unsigned int _duration;
+    int _nextTimer;
+    uint8_t _currentState;
+    bool _first;
+    uint8_t _smokeDuration;
+    uint8_t _pauseDuration;
 
-void handleE131();
-void printHelp();
-void printParameters();
-void printState();
-void printStateHelper(String message);
-void changeState();
-unsigned int getRemainingSeconds();
-void startTimer(unsigned int durationInSeconds);
-bool checkTimer();
-void stop();
-void setState(uint8_t state);
-uint8_t getState();
-void setSmokeDuration(uint8_t duration);
-uint8_t getSmokeDuration();
-void setPauseDuration(uint8_t duration);
-uint8_t getPauseDuration();
+    void handleSerial();
+    void handleE131();
+    void printHelp();
+    void printParameters();
+    void printState();
+    void printStateHelper(String message);
+
+  public:
+    String currentState;
+
+    Fogger();
+    void setup();
+    void loop();
+    void changeState();
+    unsigned int getRemainingSeconds();
+    void startTimer(unsigned int durationInSeconds);
+    bool checkTimer();
+    void stop();
+    void setState(uint8_t state);
+    uint8_t getState();
+    void setSmokeDuration(uint8_t duration);
+    uint8_t getSmokeDuration();
+    void setPauseDuration(uint8_t duration);
+    uint8_t getPauseDuration();
+};
+
 
 #endif //ARDUINO_FOG_FOGGER_H

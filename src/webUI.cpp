@@ -10,10 +10,11 @@ void WebUI::setup() {
 
   // shown above all tabs
 
-  _status_label = ESPUI.addControl( ControlType::Label, "Status:", "Warmup", ControlColor::None );
-  _timer_label = ESPUI.addControl( ControlType::Label, "Timer:", (String) getRemainingSeconds() + "s", ControlColor::None );
-  _smoke_duration_input = ESPUI.addControl(ControlType::Number, "Smoke duration (in s)", (String) getSmokeDuration(), ControlColor::Carrot, _settingsTab, &_setSmokeDuration);
-  _pause_duration_input = ESPUI.addControl(ControlType::Number, "Pause duration (in s)", (String) getPauseDuration(), ControlColor::Carrot, _settingsTab, &_setPauseDuration);
+  _status_label = ESPUI.addControl( ControlType::Label, "Status:", fogger.currentState, ControlColor::None );
+  _timer_label = ESPUI.addControl( ControlType::Label, "Timer:", (String) fogger.getRemainingSeconds() + " s", ControlColor::None );
+  _e131_label = ESPUI.addControl( ControlType::Label, "E131 status:", e131.state, ControlColor::None );
+  _smoke_duration_input = ESPUI.addControl(ControlType::Number, "Smoke duration (in s)", (String) fogger.getSmokeDuration(), ControlColor::Carrot, _settingsTab, &_setSmokeDuration);
+  _pause_duration_input = ESPUI.addControl(ControlType::Number, "Pause duration (in s)", (String) fogger.getPauseDuration(), ControlColor::Carrot, _settingsTab, &_setPauseDuration);
   _force_smoke_button = ESPUI.addControl(ControlType::Button, "Force Smoke", "Smoke", ControlColor::Peterriver, _controlsTab, &_forceSmoke);
   _stop_smoke_button = ESPUI.addControl(ControlType::Button, "Stop Smoke", "Stop", ControlColor::Peterriver, _controlsTab, &_stopSmoke);
   _auto_smoke_button = ESPUI.addControl(ControlType::Button, "Auto Smoke", "Auto Mode", ControlColor::Peterriver, _controlsTab, &_autoMode);
@@ -22,8 +23,9 @@ void WebUI::setup() {
 }
 
 void WebUI::loop() {
-  updateControlIfChanged(_status_label, current_state_card_value);
-  updateControlIfChanged(_timer_label, (String) getRemainingSeconds() + "s");
+  updateControlIfChanged(_status_label, fogger.currentState);
+  updateControlIfChanged(_timer_label, (String) fogger.getRemainingSeconds() + "s");
+  updateControlIfChanged(_e131_label, e131.state);
 }
 
 void WebUI::updateControlIfChanged(uint8_t control, String value) {
@@ -34,35 +36,35 @@ void WebUI::updateControlIfChanged(uint8_t control, String value) {
 
 void WebUI::_setSmokeDuration(Control *sender, int type) {
   uint8_t value = sender->value.toInt();
-  setSmokeDuration(value);
+  fogger.setSmokeDuration(value);
 }
 
 void WebUI::_setPauseDuration(Control *sender, int type) {
   uint8_t value = sender->value.toInt();
-  setPauseDuration(value);
+  fogger.setPauseDuration(value);
 }
 
 void WebUI::_stopSmoke(Control *sender, int type) {
-  setState(STOP_STATE);
+  fogger.setState(STOP_STATE);
 }
 
 void WebUI::_autoMode(Control *sender, int type) {
-  setState(PAUSE_STATE);
+  fogger.setState(PAUSE_STATE);
 }
 
 void WebUI::_forceSmoke(Control *sender, int type) {
-  setState(HOLD_STATE);
+  fogger.setState(HOLD_STATE);
 }
 
 void WebUI::_smoke(Control *sender, int type) {
   switch (type) {
   case B_DOWN:
-    webUI.lastState = getState();
-    setState(SMOKE_STATE);
+    webUI.lastState = fogger.getState();
+    fogger.setState(SMOKE_STATE);
     break;
 
   case B_UP:
-    setState(webUI.lastState);
+    fogger.setState(webUI.lastState);
     break;
   }
     

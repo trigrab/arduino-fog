@@ -3,7 +3,11 @@
 
 #include <ESPUI.h>
 #include "fogger.h"
+#include "e131.h"
+
 extern String current_state_card_value;
+extern Fogger fogger;
+extern E131 e131;
 
 class WebUI {
   private:
@@ -11,6 +15,7 @@ class WebUI {
     uint16_t _settingsTab;
     uint16_t _status_label;
     uint16_t _timer_label;
+    uint16_t _e131_label;
     uint16_t _smoke_duration_input;
     uint16_t _pause_duration_input;
     uint16_t _force_smoke_button;
